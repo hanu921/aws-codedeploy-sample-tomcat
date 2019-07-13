@@ -1,0 +1,47 @@
+pipeline{ 
+
+agent any
+
+stages{
+
+stage('checkout'){
+
+steps{
+
+checkout([$class: 'GitSCM', 
+    branches: [[name: '*/master']], 
+    doGenerateSubmoduleConfigurations: false, 
+    extensions: [[$class: 'CleanCheckout']], 
+    submoduleCfg: [], 
+    userRemoteConfigs: [[credentialsId: 'git-credentials', url: 'https://github.com/user/repo.git']]
+])
+
+    }
+
+                 }
+
+stage('build'){
+
+steps{
+sh 'mvn package'
+
+     }
+              }
+
+stage('deploy'){
+
+steps{
+
+sh 'ssh root@3.84.55.178 "/root/apache-tomcat-9.0.22/bin/shutdown.sh"'
+
+sh 'scp /var/lib/jenkins/workspace/pipetomcat/target/SampleMavenTomcatApp.war root@3.84.55.178:/root/apache-tomcat-9.0.22/webapps'
+
+sh 'ssh root@3.84.55.178 "/root/apache-tomcat-9.0.22/bin/startup.sh"'
+     }
+               }
+
+
+
+                }
+
+        }
